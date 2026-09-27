@@ -4,7 +4,6 @@ using FishNet.Object;
 public class PlayerMovement : NetworkBehaviour 
 {
     public float moveSpeed = 5f;
-    public float rotationSpeed = 720f;
 
     public override void OnStartClient()
     {
@@ -14,8 +13,8 @@ public class PlayerMovement : NetworkBehaviour
         if (IsOwner) {
             GetComponent<Renderer>().material.color = Color.green;
             float randomX = Random.Range(-3f, 3f);
-            float randomZ = Random.Range(-3f, 3f);
-            transform.position = new Vector3(randomX, 0.5f, randomZ);
+            float randomY = Random.Range(-3f, 3f);
+            transform.position = new Vector3(randomX, randomY, 0f);
         } 
         else {
             GetComponent<Renderer>().material.color = Color.red;
@@ -44,10 +43,6 @@ public class PlayerMovement : NetworkBehaviour
         {
             // Memindahkan posisi karakter
             transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
-
-            // Memutar rotasi karakter 2D (menghadap ke arah gerakan pada sumbu Z)
-            Quaternion targetRotation = Quaternion.LookRotation(Vector3.forward, moveDirection);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
     }
 }
