@@ -70,14 +70,14 @@ public class PlayerStats : NetworkBehaviour
           if (!IsOwner) return;
           // Simulasi input keyboard untuk pengujian
           // Tekan 'K' untuk mengurangi HP
-          if (Input.GetKeyDown(KeyCode.K))
-          {
-               DecreaseHealth(10);
-          }
-          // Tekan 'L' untuk menambah Score
-          if (Input.GetKeyDown(KeyCode.L))
-          {
-               IncreaseScore(5);
-          }
+          // if (Input.GetKeyDown(KeyCode.K))
+          // {
+          //      DecreaseHealth(10);
+          // }
+          // // Tekan 'L' untuk menambah Score
+          // if (Input.GetKeyDown(KeyCode.L))
+          // {
+          //      IncreaseScore(5);
+          // }
      }
 }

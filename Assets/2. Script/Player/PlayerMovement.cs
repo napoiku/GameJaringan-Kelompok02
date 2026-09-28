@@ -4,20 +4,25 @@ using FishNet.Object;
 public class PlayerMovement : NetworkBehaviour 
 {
     public float moveSpeed = 5f;
+    public float jumpForce = 7f;
+
+    public Transform groundCheck;     // Titik acuan di kaki pemain
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;     // Layer khusus untuk lantai/platform
+
+    [SerializeField] private Rigidbody2D rb;
+    private bool isGrounded;
+    private bool isFacingRight = true; 
 
     public override void OnStartClient()
     {
         base.OnStartClient();
 
-        // Mengubah warna berdasarkan kepemilikan
         if (IsOwner) {
-            GetComponent<Renderer>().material.color = Color.green;
-            float randomX = Random.Range(-3f, 3f);
-            float randomY = Random.Range(-3f, 3f);
-            transform.position = new Vector3(randomX, randomY, 0f);
+            transform.position = new Vector3(-7.5f, -2.3f, 0f);
         } 
         else {
-            GetComponent<Renderer>().material.color = Color.red;
+            GetComponent<SpriteRenderer>().color = Color.red;
         }
     }
 
@@ -27,22 +32,60 @@ public class PlayerMovement : NetworkBehaviour
         if (!IsOwner) 
             return;
 
+        CekTanah();
         HandleMovement2D();
+        HandleJump();
+    }
+
+    private void CekTanah()
+    {
+        if (groundCheck != null)
+        {
+            isGrounded = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundLayer);
+        }
     }
 
     private void HandleMovement2D()
     {
-        // Membaca input keyboard (WASD / Panah)
         float moveX = Input.GetAxis("Horizontal");
-        float moveY = Input.GetAxis("Vertical");
 
-        // Pergerakan 2D menggunakan sumbu X dan Y
-        Vector2 moveDirection = new Vector2(moveX, moveY).normalized;
+        rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
 
-        if (moveDirection.magnitude >= 0.1f)
+        if (moveX > 0 && !isFacingRight)
         {
-            // Memindahkan posisi karakter
-            transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
+            Flip();
+        }
+
+        else if (moveX < 0 && isFacingRight)
+        {
+            Flip();
+        }
+    }
+
+    private void HandleJump()
+    {
+        if (Input.GetButtonDown("Jump") && isGrounded)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        }
+    }
+
+    private void Flip()
+    {
+        // Ubah status menghadap
+        isFacingRight = !isFacingRight;
+
+        Vector3 currentScale = transform.localScale;
+        currentScale.x *= -1;
+        transform.localScale = currentScale;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (groundCheck != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
 }
