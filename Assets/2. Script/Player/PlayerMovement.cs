@@ -14,18 +14,6 @@ public class PlayerMovement : NetworkBehaviour
     private bool isGrounded;
     private bool isFacingRight = true; 
 
-    public override void OnStartClient()
-    {
-        base.OnStartClient();
-
-        if (IsOwner) {
-            transform.position = new Vector3(-7.5f, -2.3f, 0f);
-        } 
-        else {
-            GetComponent<SpriteRenderer>().color = Color.red;
-        }
-    }
-
     void Update()
     {
         // Cegah client lain menggerakkan karakter ini

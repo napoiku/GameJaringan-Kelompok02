@@ -1,60 +1,39 @@
 using FishNet;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 
 public class NetworkManagerUI : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private Button hostButton;
-    [SerializeField] private Button clientButton;
-    [SerializeField] private TextMeshProUGUI statusText;
+    public GameObject connectionPanel; // Masukkan objek UI Panel yang berisi tombol ke sini
+    public Button hostButton;
+    public Button clientButton;
 
     private void Awake()
     {
-        // Menambahkan listener event pada tombol UI
         hostButton.onClick.AddListener(OnHostButtonClicked);
         clientButton.onClick.AddListener(OnClientButtonClicked);
     }
 
     private void OnHostButtonClicked()
     {
-        // Host berarti menjalankan fungsi StartConnection untuk Server dan Client sekaligus.
+        // Jalankan Server dan Client sekaligus untuk Host
         bool serverStarted = InstanceFinder.ServerManager.StartConnection();
         bool clientStarted = InstanceFinder.ClientManager.StartConnection();
 
         if (serverStarted && clientStarted)
         {
-            UpdateUIStatus("Status: Connected as HOST");
-        }
-        else
-        {
-            UpdateUIStatus("Status: Failed to Start Host");
+            // Matikan UI Koneksi, biarkan GameManager (Waiting Panel) mengambil alih
+            if (connectionPanel != null) connectionPanel.SetActive(false);
         }
     }
 
     private void OnClientButtonClicked()
     {
-        // Menjalankan fungsi StartConnection khusus untuk Client.
+        // Jalankan Client saja
         if (InstanceFinder.ClientManager.StartConnection())
         {
-            UpdateUIStatus("Status: Connecting as CLIENT...");
+            if (connectionPanel != null) connectionPanel.SetActive(false);
         }
-        else
-        {
-            UpdateUIStatus("Status: Failed to Start Client");
-        }
-    }
-
-    private void UpdateUIStatus(string message)
-    {
-        if (statusText != null)
-        {
-            statusText.text = message;
-        }
-
-        // Menyembunyikan tombol pilihan setelah role dipilih
-        if (hostButton != null) hostButton.gameObject.SetActive(false);
-        if (clientButton != null) clientButton.gameObject.SetActive(false);
     }
 }

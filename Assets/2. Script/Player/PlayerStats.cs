@@ -9,7 +9,7 @@ public class PlayerStats : NetworkBehaviour
      [SerializeField] private Slider healthSlider;
      [SerializeField] private TextMeshProUGUI scoreText;
 
-     public readonly SyncVar<int> health = new SyncVar<int>(100);
+     public readonly SyncVar<int> health = new SyncVar<int>(30);
      public readonly SyncVar<int> score = new SyncVar<int>(0);
 
      private void Awake()
@@ -17,6 +17,13 @@ public class PlayerStats : NetworkBehaviour
           health.OnChange += OnHealthChanged;
           score.OnChange += OnScoreChanged; // Daftarkan event skor
      }
+
+     public override void OnStartServer()
+    {
+        base.OnStartServer();
+        
+          GameManager.Instance.RegisterPlayer();
+    }
 
      private void OnDestroy()
      {
@@ -56,7 +63,12 @@ public class PlayerStats : NetworkBehaviour
      [ServerRpc(RequireOwnership = false)]
      public void DecreaseHealth(int damage)
      {
-          health.Value -= damage; 
+          health.Value -= damage;
+
+          if (health.Value <= 0)
+          {
+               GameManager.Instance.PlayerDied();
+          }
      }
 
      [ServerRpc]
