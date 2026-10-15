@@ -5,7 +5,7 @@ public class EnemyAI : NetworkBehaviour
 {
      [Header("Pengaturan Gerak")]
      public float moveSpeed = 2f;
-     private int arahGerak = -1; // -1 = Kiri, 1 = Kanan
+     private float arahGerak = -0.38f;
 
      [Header("Efek Pantulan (Bisa Diatur Lewat Inspector)")]
      [Tooltip("Tinggi pantulan pemain saat berhasil menginjak musuh dari atas")]
@@ -39,7 +39,7 @@ public class EnemyAI : NetworkBehaviour
           arahGerak *= -1; 
                
           // Balik orientasi hadap sprite (Flip X)
-          transform.localScale = new Vector3(-arahGerak, 1f, 1f);
+          transform.localScale = new Vector3(arahGerak, 0.38f, 0.38f);
      }
 
      private void OnCollisionEnter2D(Collision2D collision)
@@ -64,7 +64,7 @@ public class EnemyAI : NetworkBehaviour
 
                // DETEKSI ATAS: Kaki pemain harus benar-benar berada di atas kepala musuh,
                // DAN pemain harus sedang bergerak turun atau diam (bukan sedang melompat ke atas)
-               if (batasBawahPemain >= batasAtasMusuh - 0.15f && rbPemain != null && rbPemain.linearVelocity.y <= 0.1f)
+               if (batasBawahPemain >= batasAtasMusuh - 0.2f && rbPemain != null && rbPemain.linearVelocity.y <= 0.1f)
                {
                     // Tambah skor pemain
                     if (statsPemain != null)
