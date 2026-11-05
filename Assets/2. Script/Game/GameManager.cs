@@ -3,6 +3,7 @@ using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 
 // Mendefinisikan status permainan
 public enum GameState { Waiting, Playing, GameWon, GameOver }
@@ -15,6 +16,10 @@ public class GameManager : NetworkBehaviour
     public GameObject waitPanel;
     public GameObject winPanel;
     public GameObject losePanel;
+
+    [Header("Score UI")]
+    public TextMeshProUGUI matchScoreText;
+    public TextMeshProUGUI highScoreText;
 
     [Header("Game State")]
     public readonly SyncVar<GameState> currentState = new SyncVar<GameState>(GameState.Waiting);
@@ -51,6 +56,43 @@ public class GameManager : NetworkBehaviour
         if (waitPanel) waitPanel.SetActive(state == GameState.Waiting);
         if (winPanel) winPanel.SetActive(state == GameState.GameWon);
         if (losePanel) losePanel.SetActive(state == GameState.GameOver);
+
+        if ((state == GameState.GameWon || state == GameState.GameOver) && IsClientInitialized)
+        {
+            ProcessAndDisplayScores();
+        }
+    }
+
+    private void ProcessAndDisplayScores()
+    {
+        // Pastikan ScoreManager tersedia
+        if (ScoreManager.Instance == null) return;
+
+        // Ambil PlayerStats milik Client lokal menggunakan InstanceFinder dari FishNet
+        PlayerStats localPlayer = FishNet.InstanceFinder.ClientManager.Connection.FirstObject.GetComponent<PlayerStats>();
+
+        if (localPlayer != null)
+        {
+            int currentMatchScore = localPlayer.score.Value;
+
+            if (matchScoreText != null)
+                matchScoreText.text = $"Match Score: {currentMatchScore}";
+                matchScoreText.gameObject.SetActive(true);
+
+            // 1. Simpan skor match terkini ke backend
+            ScoreManager.Instance.SaveCurrentScore(currentMatchScore, () =>
+            {
+                // 2. Setelah simpan selesai, ambil skor tertinggi terbaru
+                ScoreManager.Instance.GetPersonalHighScore((retrievedHighScore) =>
+                {
+                    if (highScoreText != null)
+                    {
+                        highScoreText.text = $"Personal High Score: {retrievedHighScore}";
+                        highScoreText.gameObject.SetActive(true);
+                    }
+                });
+            });
+        }
     }
 
     public void RegisterPlayer()
